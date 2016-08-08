@@ -12,6 +12,7 @@ Pagination({
 
 ## options
 
-|options|empty|default|description|
-|:-----:|----|-------|-----------|
-|url|false|null|ajax request url,to get data from server|
+|options|type|empty|default|description|
+|:-----:|----|-----|-------|-----------|
+|url|string|false|null|ajax request url,to get data from server|
+params|object|true|-|if you need to send other params to the server, you can add to it.for example, `params:{pcount: 20}`|
