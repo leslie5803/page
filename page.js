@@ -1,12 +1,13 @@
 /**
- * Pull down to refresh
+ * Pull down/up to refresh
  *
  * @author Zeno Li
  * @date   2016-08-01
  */
 ;(function ($,win,doc) {
     var page  = 2,
-        empty = false;
+        empty = false,
+        loading = false;
 
     /**
      * @param {object}     options
@@ -18,16 +19,19 @@
     function _pagination(options) {
         var defaults = {
             url: null,
+            reqType: 'GET',
             params: {
                 page: page
             },
+            delay: 100,
             getHtml:function () {
 
             },
             bindEvent: function () {
 
-            }
-        };
+            },
+            showTips: showTips
+        },
         defaults = $.extend(true, defaults, options);
 
         if(!defaults.url.length){
@@ -39,28 +43,33 @@
                 scrollHeight = doc.documentElement.scrollHeight || doc.body.scrollHeight,
                 scrolltop = doc.body.scrollTop;
 
-            if(scrolltop + clientHeight >= scrollHeight - 50 && !empty){
+            if(scrolltop + clientHeight >= scrollHeight - 100 && !empty && !loading){
+                loading = true;
+                defaults.showTips(!empty);
                 $.ajax({
                     url: defaults.url,
-                    type: 'GET',
+                    type: defaults.reqType,
                     data: defaults.params,
                     success: function (response) {
-                        if(response.error_code === 0) {
+                        if (response.error_code === 0) {
                             if (!response.data.length) {
                                 $(win).off('scroll');
                                 empty = true;
+                                defaults.showTips(!empty);
                                 return false;
                             }
 
+                            $('.loadingmore').remove();
                             var html = defaults.getHtml(response.data);
                             $('.content-module').append(html);
-                            defaults.params.page++;
+                            ++defaults.params.page;
                             defaults.bindEvent();
+                            loading = false;
                         }
                     }
                 });
             }
-        }, 200));
+        }, defaults.delay));
     }
 
     function debounce(func, wait, immediate) {
@@ -78,5 +87,15 @@
         };
     }
 
+    function showTips(more) {
+        if(more) {
+            $('.loadingmore').remove();
+            $('<p class="loadingmore" style="text-align: center;">加载中...</p>').appendTo('.content-module')
+        }else {
+            $('.loadingmore').remove();
+            $('<p class="loadingmore" style="text-align: center;">没有更多数据了</p>').appendTo('.content-module');
+        }
+    }
+
     window.Pagination = _pagination;
-})(jQuery,window,document);
+})(Zepto,window,document);
