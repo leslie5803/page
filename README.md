@@ -1,3 +1,6 @@
+- [page](#page)
+- [Usage](#Usage)
+- [options](#options)
 # page
 pull up to refresh
 
